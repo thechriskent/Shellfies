@@ -1,7 +1,13 @@
+import { DisplayMode } from "@microsoft/sp-core-library";
+import { SPFI } from "@pnp/sp";
+
 export interface IShellfiesProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
+  title: string;
   hasTeamsContext: boolean;
-  userDisplayName: string;
+  displayMode: DisplayMode;
+  updateTitle: (newTitle: string) => void;
+  sp: SPFI;
+  listId?: string;
+  columnName?: string;
+  limit: number;
 }

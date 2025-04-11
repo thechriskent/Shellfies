@@ -1,0 +1,25 @@
+.egg {
+    width: 100px;
+    height: 130px;
+    background: var(--user) center/cover no-repeat;
+    mask: var(--eggPlain) center/contain no-repeat;
+    position: relative;
+
+    .open,
+    .closed {
+        background-color: "[theme:themeLighter, default: beige]";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+    }
+
+    .open {
+        mask: var(--eggHalf) center/contain no-repeat;
+    }
+    
+    .closed {
+        mask: var(--eggPlain) center/contain no-repeat;
+    }
+}

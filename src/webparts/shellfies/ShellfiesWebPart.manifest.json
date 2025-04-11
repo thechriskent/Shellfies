@@ -19,10 +19,11 @@
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Advanced
     "group": { "default": "Advanced" },
     "title": { "default": "Shellfies" },
-    "description": { "default": "Shellfies description" },
-    "officeFabricIconFontName": "Page",
+    "description": { "default": "Shows people in eggs and makes you cry at the beauty" },
+    "officeFabricIconFontName": "Camera",
     "properties": {
-      "description": "Shellfies"
+      "title": "Shellfies",
+      "limit": 3
     }
   }]
 }

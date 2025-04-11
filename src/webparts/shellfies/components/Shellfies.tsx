@@ -1,43 +1,62 @@
 import * as React from 'react';
 import styles from './Shellfies.module.scss';
 import type { IShellfiesProps } from './IShellfiesProps';
-import { escape } from '@microsoft/sp-lodash-subset';
+import { WebPartTitle } from '@pnp/spfx-controls-react';
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import { Egg } from './Egg';
 
-export default class Shellfies extends React.Component<IShellfiesProps> {
-  public render(): React.ReactElement<IShellfiesProps> {
-    const {
-      description,
-      isDarkTheme,
-      environmentMessage,
-      hasTeamsContext,
-      userDisplayName
-    } = this.props;
+export interface IEgg {
+  imageSrc: string;
+  name: string;
+}
 
-    return (
-      <section className={`${styles.shellfies} ${hasTeamsContext ? styles.teams : ''}`}>
-        <div className={styles.welcome}>
-          <img alt="" src={isDarkTheme ? require('../assets/welcome-dark.png') : require('../assets/welcome-light.png')} className={styles.welcomeImage} />
-          <h2>Well done, {escape(userDisplayName)}!</h2>
-          <div>{environmentMessage}</div>
-          <div>Web part property value: <strong>{escape(description)}</strong></div>
-        </div>
+export const Shellfies = (props: IShellfiesProps): JSX.Element => {
+  const {
+    title,
+    hasTeamsContext,
+    displayMode,
+    updateTitle,
+    sp,
+    listId,
+    columnName,
+    limit,
+  } = props;
+
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [eggs, setEggs] = React.useState<IEgg[]>([]);
+
+  React.useEffect(() => {
+    const getEggs = async (): Promise<void> => {
+      if(listId && columnName) {
+        const items = await sp.web.lists.getById(listId).items.select(`${columnName}/Title,${columnName}/EMail`).top(limit).expand(columnName)();
+        setEggs(items.map((item) => ({
+          imageSrc: `/_layouts/15/userphoto.aspx?size=L&username=${item[columnName].EMail}`,
+          name: item[columnName].Title,
+        }))
+        );
+        setIsLoaded(true);
+      }
+    };
+    getEggs().catch((error) => {
+      console.error('Error fetching eggs:', error);
+    });
+  }, [listId, columnName, limit, sp]);
+
+  return (
+    <section className={`${styles.shellfies} ${hasTeamsContext ? styles.teams : ''}`}>
+      <WebPartTitle title={title} updateProperty={updateTitle} displayMode={displayMode} />
+      {!isLoaded &&
+        <Spinner size={SpinnerSize.large} label="loading..." />
+      }
+      {isLoaded &&
         <div>
-          <h3>Welcome to SharePoint Framework!</h3>
-          <p>
-            The SharePoint Framework (SPFx) is a extensibility model for Microsoft Viva, Microsoft Teams and SharePoint. It&#39;s the easiest way to extend Microsoft 365 with automatic Single Sign On, automatic hosting and industry standard tooling.
-          </p>
-          <h4>Learn more about SPFx development:</h4>
-          <ul className={styles.links}>
-            <li><a href="https://aka.ms/spfx" target="_blank" rel="noreferrer">SharePoint Framework Overview</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-graph" target="_blank" rel="noreferrer">Use Microsoft Graph in your solution</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-teams" target="_blank" rel="noreferrer">Build for Microsoft Teams using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-viva" target="_blank" rel="noreferrer">Build for Microsoft Viva Connections using SharePoint Framework</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-store" target="_blank" rel="noreferrer">Publish SharePoint Framework applications to the marketplace</a></li>
-            <li><a href="https://aka.ms/spfx-yeoman-api" target="_blank" rel="noreferrer">SharePoint Framework API reference</a></li>
-            <li><a href="https://aka.ms/m365pnp" target="_blank" rel="noreferrer">Microsoft 365 Developer Community</a></li>
-          </ul>
+          {eggs.map((egg, index) => (
+            <div key={index}>
+              <Egg imgSrc={egg.imageSrc} key={index} />
+            </div>
+          ))}
         </div>
-      </section>
-    );
-  }
+      }
+    </section>
+  );
 }
